@@ -5,13 +5,20 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     return queryInterface.bulkInsert('TransactionTypes', [
       {
+        "id": 1,
         "name": "masuk"
       },
       {
-        "name": "keluar"
+        "id": 2,
+        "name": "giling"
       },
       {
+        "id": 3,
         "name": "pindah"
+      },
+      {
+        "id": 4,
+        "name": "jual"
       }
     ])
   },

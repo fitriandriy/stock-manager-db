@@ -7,6 +7,7 @@ module.exports = {
       {
         "warehouse_id": 1,
         "supplier_id": 1,
+        "customer_id": null,
         "material_type_id": 2,
         "amount": 200,
         "transaction_type_id": 1,
@@ -17,6 +18,7 @@ module.exports = {
       {
         "warehouse_id": 2,
         "supplier_id": 4,
+        "customer_id": null,
         "material_type_id": 1,
         "amount": 200,
         "transaction_type_id": 1,

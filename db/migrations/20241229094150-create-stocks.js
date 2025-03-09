@@ -15,6 +15,9 @@ module.exports = {
       supplier_id: {
         type: Sequelize.INTEGER
       },
+      customer_id: {
+        type: Sequelize.INTEGER
+      },
       material_type_id: {
         type: Sequelize.INTEGER
       },

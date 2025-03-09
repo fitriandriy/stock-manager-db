@@ -20,6 +20,11 @@ module.exports = (sequelize, DataTypes) => {
         as: "supplier"
       })
 
+      Stocks.belongsTo(models.Customers, {
+        foreignKey: "customer_id",
+        as: "customer"
+      })
+
       Stocks.belongsTo(models.TransactionTypes, {
         foreignKey: "transaction_type_id",
         as: "transaction_type"
@@ -39,6 +44,7 @@ module.exports = (sequelize, DataTypes) => {
   Stocks.init({
     warehouse_id: DataTypes.INTEGER,
     supplier_id: DataTypes.INTEGER,
+    customer_id: DataTypes.INTEGER,
     material_type_id: DataTypes.INTEGER,
     amount: DataTypes.INTEGER,
     transaction_type_id: DataTypes.INTEGER,

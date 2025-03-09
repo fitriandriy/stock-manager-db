@@ -2,7 +2,7 @@ const { v4: uuidv4 } = require("uuid");
 const { Op } = require("sequelize");
 const { sequelize, queryTypes } = require("../external/postgres");
 const jwt = require("jsonwebtoken")
-const { Stocks, Users, Warehouses, Suppliers, MaterialTypes, TransactionTypes } = require("../db/models");
+const { Stocks, Users, Warehouses, Suppliers, Customers, MaterialTypes, TransactionTypes } = require("../db/models");
 const { JWT_SECRET_KEY } = process.env;
 
 module.exports = {
@@ -336,6 +336,7 @@ module.exports = {
         include: [
           { model: Warehouses, as: 'warehouse', attributes: ['name'] },
           { model: Suppliers, as: 'supplier', attributes: ['name'] },
+          { model: Customers, as: 'customer', attributes: ['name'] },
           { model: MaterialTypes, as: 'material', attributes: ['name'] },
           { model: TransactionTypes, as: 'transaction_type', attributes: ['name'] },
           { model: Users, as: 'user', attributes: ['username'] }
@@ -348,7 +349,7 @@ module.exports = {
       const initialTotals = await sequelize.query(`
         SELECT 
           COALESCE(SUM(CASE WHEN transaction_type_id = 1 THEN amount END), 0) -
-          COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3) THEN amount END), 0) AS total,
+          COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3, 4) THEN amount END), 0) AS total,
           material_type_id
         FROM "Stocks"
         WHERE warehouse_id = ${warehouse} AND "createdAt" < '${startDate.toISOString()}'
@@ -360,7 +361,7 @@ module.exports = {
         A: initialTotals.find(row => row.material_type_id === 1)?.total || 0,
         B: initialTotals.find(row => row.material_type_id === 2)?.total || 0,
         C: initialTotals.find(row => row.material_type_id === 3)?.total || 0,
-        // BR: initialTotals.find(row => row.material_type_id === 4)?.total || 0
+        BRAMO: initialTotals.find(row => row.material_type_id === 4)?.total || 0,
       };
   
       let lastProcessedDate = null;
@@ -392,18 +393,19 @@ module.exports = {
 
         if (stock.transaction_type_id === 1) { // Transaksi masuk
           totalStockCache[materialKey] += stockAmount;
-        } else if (stock.transaction_type_id === 2 || stock.transaction_type_id === 3) { // Transaksi keluar
+        } else if (stock.transaction_type_id === 2 || stock.transaction_type_id === 3 || stock.transaction_type_id === 4) { // Transaksi keluar
           totalStockCache[materialKey] -= stockAmount;
         }
 
         totalIR64 = Number(totalStockCache["A"]) + Number(totalStockCache["B"]) + Number(totalStockCache["C"]);
         totalGlobalBr = Number(totalStockCache["BRAMO"]) || 0;
-  
+        
         return {
           id: stock.id,
           amount: stock.amount,
           warehouse: stock.warehouse.name,
-          supplier: stock.supplier.name,
+          supplier: stock.supplier?.name || "N/A",
+          customer: stock.customer?.name || "N/A",
           material: stock.material.name,
           transaction_type: stock.transaction_type.name,
           user: stock.user.username,
@@ -414,7 +416,7 @@ module.exports = {
           totalBr: totalStockCache.BRAMO || 0,
           totalIR64,
           totalGlobalBr
-        };
+        }; 
       });
   
       res.status(200).json({
@@ -434,7 +436,7 @@ module.exports = {
 
   create: async (req, res) => {
     try {
-      const { warehouse_id, supplier_id, material_type_id, amount, transaction_type_id, editor_id, createdAt } = req.body;
+      const { warehouse_id, supplier_id, customer_id, material_type_id, amount, transaction_type_id, editor_id, createdAt } = req.body;
 
       const user = await Users.findOne({where: {id: editor_id}})
 
@@ -449,6 +451,7 @@ module.exports = {
       const stocks = await Stocks.create({
         warehouse_id,
         supplier_id,
+        customer_id,
         material_type_id,
         amount,
         transaction_type_id,
