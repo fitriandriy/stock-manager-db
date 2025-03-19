@@ -4,6 +4,7 @@ const stok = require("../controllers/stocks.js")
 const authMiddleware = require("../middlewares/auth.js")
 
 router.get("/:warehouse/:date", authMiddleware.auth, stok.query_data)
+router.get("/:date", authMiddleware.auth, stok.reports)
 router.post("/", authMiddleware.auth, stok.create)
 router.post("/move", authMiddleware.auth, stok.move)
 router.put("/", authMiddleware.auth, stok.update)

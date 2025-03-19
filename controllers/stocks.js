@@ -616,37 +616,314 @@ module.exports = {
     }
   },
 
+  // reports: async (req, res) => {
+  //   try {
+  //     const {date} = req.params;
+  //     const startDate = new Date(`${date}T00:00:00Z`);
+  //     const endDate = new Date(`${date}T23:59:59.999Z`);
+  //     const certainDate = {
+  //       [Op.between]: [startDate, endDate]
+  //     }
+
+  //     const giling64 = await sequelize.query(`
+  //       SELECT SUM(amount) AS total_amount
+  //         FROM "Stocks"
+  //         WHERE transaction_type_id = 2
+  //           AND material_type_id IN (1, 2, 3)
+  //           AND DATE("createdAt") = ${certainDate};
+  //       `)
+  //     const gilingBr = await sequelize.query(`
+  //       SELECT SUM(amount) AS total_amount
+  //         FROM "Stocks"
+  //         WHERE transaction_type_id = 2
+  //           AND material_type_id IN (4)
+  //           AND DATE("createdAt") = ${certainDate};
+  //       `)
+  //     const totalA = await sequelize.query(`
+  //         SELECT 
+  //         COALESCE(
+  //             (SELECT SUM("amount") FROM "Stocks" 
+  //             WHERE "material_type_id" = 1 
+  //             AND "transaction_type_id" = 1 
+  //             AND "createdAt"::DATE <= '${certainDate}'), 0) 
+  //         - 
+  //         COALESCE(
+  //             (SELECT SUM("amount") FROM "Stocks" 
+  //             WHERE "material_type_id" = 1 
+  //             AND "transaction_type_id" IN (2, 3, 4) 
+  //             AND "createdAt"::DATE <= '${certainDate}'), 0) 
+  //         AS "total_stock_a";
+  //       `)
+  //     const totalB = await sequelize.query(`
+  //         SELECT 
+  //         COALESCE(
+  //             (SELECT SUM("amount") FROM "Stocks" 
+  //             WHERE "material_type_id" = 2 
+  //             AND "transaction_type_id" = 1 
+  //             AND "createdAt"::DATE <= '${certainDate}'), 0) 
+  //         - 
+  //         COALESCE(
+  //             (SELECT SUM("amount") FROM "Stocks" 
+  //             WHERE "material_type_id" = 2 
+  //             AND "transaction_type_id" IN (2, 3, 4) 
+  //             AND "createdAt"::DATE <= '${certainDate}'), 0) 
+  //         AS "total_stock_b";
+  //       `)
+  //     const totalC = await sequelize.query(`
+  //         SELECT 
+  //         COALESCE(
+  //             (SELECT SUM("amount") FROM "Stocks" 
+  //             WHERE "material_type_id" = 3 
+  //             AND "transaction_type_id" = 1 
+  //             AND "createdAt"::DATE <= '${certainDate}'), 0) 
+  //         - 
+  //         COALESCE(
+  //             (SELECT SUM("amount") FROM "Stocks" 
+  //             WHERE "material_type_id" = 3 
+  //             AND "transaction_type_id" IN (2, 3, 4) 
+  //             AND "createdAt"::DATE <= '${certainDate}'), 0) 
+  //         AS "total_stock_b";
+  //       `)
+  //     const totalBr = await sequelize.query(`
+  //         SELECT 
+  //         COALESCE(
+  //             (SELECT SUM("amount") FROM "Stocks" 
+  //             WHERE "material_type_id" = 4 
+  //             AND "transaction_type_id" = 1 
+  //             AND "createdAt"::DATE <= '${certainDate}'), 0) 
+  //         - 
+  //         COALESCE(
+  //             (SELECT SUM("amount") FROM "Stocks" 
+  //             WHERE "material_type_id" = 4 
+  //             AND "transaction_type_id" IN (2, 3, 4) 
+  //             AND "createdAt"::DATE <= '${certainDate}'), 0) 
+  //         AS "total_stock_bramo";
+  //       `)
+  //     const [totalIR64Result] = await sequelize.query(`
+  //       SELECT 
+  //         COALESCE(SUM(CASE WHEN transaction_type_id = 1 AND material_type_id IN 
+  //           (SELECT id FROM "MaterialTypes" WHERE name IN ('A', 'B', 'C')) THEN amount END), 0) -
+  //         COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3) AND material_type_id IN 
+  //           (SELECT id FROM "MaterialTypes" WHERE name IN ('A', 'B', 'C')) THEN amount END), 0) AS total_IR64
+  //       FROM "Stocks"
+  //       WHERE "createdAt" <= '2025-01-24'
+  //     `);
+
+  //     return res.status(200).json({
+  //       status: true,
+  //       message: "success",
+  //       data: {
+  //         giling64,
+  //         gilingBr,
+  //         totalA,
+  //         totalB,
+  //         totalC,
+  //         totalBr
+  //       }
+  //     })
+  //   } catch (error) {
+  //     console.error(error);
+  //     res.status(500).json({
+  //       status: false,
+  //       message: "Internal server error.",
+  //     });
+  //   }
+  // }
+
   reports: async (req, res) => {
     try {
-      const {date} = req.params;
-
-      const giling64 = await sequelize.query(`
-        SELECT SUM(amount) AS total_amount
-          FROM "Stocks"
-          WHERE transaction_type_id = 2
-            AND material_type_id IN (1, 2, 3)
-            AND DATE("createdAt") = ${date};
-        `)
-      const gilingBr = await sequelize.query(`
-        SELECT SUM(amount) AS total_amount
-          FROM "Stocks"
-          WHERE transaction_type_id = 2
-            AND material_type_id IN (4)
-            AND DATE("createdAt") = ${date};
-        `)
-      const totalA = await sequelize.query(`
-        `)
-      const [totalIR64Result] = await sequelize.query(`
-        SELECT 
-          COALESCE(SUM(CASE WHEN transaction_type_id = 1 AND material_type_id IN 
-            (SELECT id FROM "MaterialTypes" WHERE name IN ('A', 'B', 'C')) THEN amount END), 0) -
-          COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3) AND material_type_id IN 
-            (SELECT id FROM "MaterialTypes" WHERE name IN ('A', 'B', 'C')) THEN amount END), 0) AS total_IR64
-        FROM "Stocks"
-        WHERE "createdAt" <= '2025-01-24'
-      `);
-    } catch (error) {
+      const { date } = req.params;
+  
+      const giling64Result = await sequelize.query(
+        `SELECT SUM(amount) AS total_amount
+         FROM "Stocks"
+         WHERE transaction_type_id = 2
+         AND material_type_id IN (1, 2, 3)
+         AND DATE("createdAt") = '${date}'`
+      );
       
+      const gilingBrResult = await sequelize.query(
+        `SELECT SUM(amount) AS total_amount
+         FROM "Stocks"
+         WHERE transaction_type_id = 2
+         AND material_type_id IN (4)
+         AND DATE("createdAt") = '${date}'`
+      );
+      
+      const totalAResult = await sequelize.query(
+        `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 1 
+                     AND "transaction_type_id" = 1 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 1 
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_a"`
+      );
+
+      const totalBResult = await sequelize.query(
+        `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 2 
+                     AND "transaction_type_id" = 1 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 2 
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_b"`
+      );
+
+      const totalCResult = await sequelize.query(
+        `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 3 
+                     AND "transaction_type_id" = 1 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 3 
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_c"`
+      );
+
+      const totalBrResult = await sequelize.query(
+        `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 4 
+                     AND "transaction_type_id" = 1 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 4 
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_br"`
+      );
+
+      const gilingBr = gilingBrResult[0][0].total_amount || 0;
+      const giling64 = giling64Result[0][0].total_amount || 0;
+      const totalA = totalAResult[0][0].total_stock_a || 0;
+      const totalB = totalBResult[0][0].total_stock_b || 0;
+      const totalC = totalCResult[0][0].total_stock_c || 0;
+      const totalIR64 = parseInt(totalA) + parseInt(totalB) + parseInt(totalC)
+      const totalBr = totalBrResult[0][0].total_stock_br || 0;
+
+      const warehouses = await Warehouses.findAll()
+
+      let data = [];
+
+      for (const warehouse of warehouses) {
+        const warehouseId = warehouse.id;
+        const warehouseName = warehouse.name;
+
+        const totalAResult = await sequelize.query(
+          `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "material_type_id" = 1 
+                     AND "transaction_type_id" = 1 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "material_type_id" = 1 
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_a"`
+        );
+
+        const totalBResult = await sequelize.query(
+          `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "material_type_id" = 2 
+                     AND "transaction_type_id" = 1 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "material_type_id" = 2 
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_b"`
+        );
+
+        const totalCResult = await sequelize.query(
+          `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "material_type_id" = 3 
+                     AND "transaction_type_id" = 1 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "material_type_id" = 3 
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_c"`
+        );
+
+        const totalBrResult = await sequelize.query(
+          `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "material_type_id" = 4 
+                     AND "transaction_type_id" = 1 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "material_type_id" = 4 
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_br"`
+        );
+
+        const totalA = totalAResult[0][0].total_stock_a || 0;
+        const totalB = totalBResult[0][0].total_stock_b || 0;
+        const totalC = totalCResult[0][0].total_stock_c || 0;
+        const totalBr = totalBrResult[0][0].total_stock_br || 0;
+
+        const totalIR64 = parseInt(totalA) + parseInt(totalB) + parseInt(totalC);
+
+        data.push({
+          id: warehouseId,
+          warehouse: warehouseName,
+          totalA,
+          totalB,
+          totalC,
+          totalIR64,
+          totalBr,
+        });
+      }
+      
+      return res.status(200).json({
+        status: true,
+        message: "success",
+        data: {
+          giling64,
+          gilingBr,
+          totalA,
+          totalB,
+          totalC,
+          totalIR64,
+          totalBr,
+          stokGudang: data
+        }
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        status: false,
+        message: "Internal server error.",
+      });
     }
-  }
+  }  
 }
