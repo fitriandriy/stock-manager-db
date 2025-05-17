@@ -8,10 +8,7 @@ const app = express()
 const router = require("./routes")
 
 app.use(bodyParser.json())
-app.use(cors({
-  origin: "http://localhost:3000",
-  credentials: true,
-}));
+app.use(cors());
 app.use(morgan("dev"))
 app.use(express.json())
 app.use(router)

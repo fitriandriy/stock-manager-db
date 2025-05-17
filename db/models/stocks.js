@@ -4,11 +4,6 @@ const {
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Stocks extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
       Stocks.belongsTo(models.MaterialTypes, {
         foreignKey: "material_type_id",
@@ -47,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
     customer_id: DataTypes.INTEGER,
     material_type_id: DataTypes.INTEGER,
     amount: DataTypes.INTEGER,
+    plate_number: DataTypes.STRING,
     transaction_type_id: DataTypes.INTEGER,
     editor_id: DataTypes.INTEGER,
     description: DataTypes.STRING,
