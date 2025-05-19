@@ -3,7 +3,7 @@ const router = express.Router()
 const fullskill = require("../controllers/fullskill")
 const authMiddleware = require("../middlewares/auth.js")
 
-router.post("/", authMiddleware.auth, fullskill.add)
-router.get("/", authMiddleware.auth, fullskill.getFullskillByMonth)
+router.post("/", fullskill.add)
+router.get("/", fullskill.getFullskillByMonth)
 
 module.exports = router
