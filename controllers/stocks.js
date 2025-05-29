@@ -315,6 +315,7 @@ module.exports = {
          FROM "Stocks"
          WHERE transaction_type_id = 2
          AND material_type_id IN (1, 2, 3)
+         AND "warehouse_id" IS NOT NULL
          AND DATE("createdAt") = '${date}'`
       );
       
@@ -323,6 +324,7 @@ module.exports = {
          FROM "Stocks"
          WHERE transaction_type_id = 2
          AND material_type_id IN (4)
+         AND "warehouse_id" IS NOT NULL
          AND DATE("createdAt") = '${date}'`
       );
       
@@ -331,11 +333,13 @@ module.exports = {
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "material_type_id" = 1 
                      AND "transaction_type_id" = 1 
+                     AND "warehouse_id" IS NOT NULL
                      AND DATE("createdAt") <= '${date}'), 0) 
            - 
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "material_type_id" = 1 
                      AND "transaction_type_id" IN (2, 3, 4) 
+                     AND "warehouse_id" IS NOT NULL
                      AND DATE("createdAt") <= '${date}'), 0) 
            AS "total_stock_a"`
       );
@@ -345,10 +349,12 @@ module.exports = {
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "material_type_id" = 2 
                      AND "transaction_type_id" = 1 
+                     AND "warehouse_id" IS NOT NULL
                      AND DATE("createdAt") <= '${date}'), 0) 
            - 
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "material_type_id" = 2 
+                     AND "warehouse_id" IS NOT NULL
                      AND "transaction_type_id" IN (2, 3, 4) 
                      AND DATE("createdAt") <= '${date}'), 0) 
            AS "total_stock_b"`
@@ -358,11 +364,13 @@ module.exports = {
         `SELECT 
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "material_type_id" = 3 
+                     AND "warehouse_id" IS NOT NULL
                      AND "transaction_type_id" = 1 
                      AND DATE("createdAt") <= '${date}'), 0) 
            - 
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "material_type_id" = 3 
+                     AND "warehouse_id" IS NOT NULL
                      AND "transaction_type_id" IN (2, 3, 4) 
                      AND DATE("createdAt") <= '${date}'), 0) 
            AS "total_stock_c"`
@@ -372,11 +380,13 @@ module.exports = {
         `SELECT 
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "material_type_id" = 4 
+                     AND "warehouse_id" IS NOT NULL
                      AND "transaction_type_id" = 1 
                      AND DATE("createdAt") <= '${date}'), 0) 
            - 
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "material_type_id" = 4 
+                     AND "warehouse_id" IS NOT NULL
                      AND "transaction_type_id" IN (2, 3, 4) 
                      AND DATE("createdAt") <= '${date}'), 0) 
            AS "total_stock_br"`
@@ -402,12 +412,14 @@ module.exports = {
           `SELECT 
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
                      AND "material_type_id" = 1 
                      AND "transaction_type_id" = 1 
                      AND DATE("createdAt") <= '${date}'), 0) 
            - 
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
                      AND "material_type_id" = 1 
                      AND "transaction_type_id" IN (2, 3, 4) 
                      AND DATE("createdAt") <= '${date}'), 0) 
@@ -418,12 +430,14 @@ module.exports = {
           `SELECT 
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
                      AND "material_type_id" = 2 
                      AND "transaction_type_id" = 1 
                      AND DATE("createdAt") <= '${date}'), 0) 
            - 
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
                      AND "material_type_id" = 2 
                      AND "transaction_type_id" IN (2, 3, 4) 
                      AND DATE("createdAt") <= '${date}'), 0) 
@@ -434,12 +448,14 @@ module.exports = {
           `SELECT 
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
                      AND "material_type_id" = 3 
                      AND "transaction_type_id" = 1 
                      AND DATE("createdAt") <= '${date}'), 0) 
            - 
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
                      AND "material_type_id" = 3 
                      AND "transaction_type_id" IN (2, 3, 4) 
                      AND DATE("createdAt") <= '${date}'), 0) 
@@ -450,12 +466,14 @@ module.exports = {
           `SELECT 
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
                      AND "material_type_id" = 4 
                      AND "transaction_type_id" = 1 
                      AND DATE("createdAt") <= '${date}'), 0) 
            - 
            COALESCE((SELECT SUM("amount") FROM "Stocks" 
                      WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
                      AND "material_type_id" = 4 
                      AND "transaction_type_id" IN (2, 3, 4) 
                      AND DATE("createdAt") <= '${date}'), 0) 

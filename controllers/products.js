@@ -774,6 +774,7 @@ module.exports = {
               material_type_id: { [Op.in]: relevantMaterialIds },
               transaction_type_id: 1,
               createdAt: { [Op.lte]: endOfDate },
+              warehouse_id: { [Op.ne]: null }
             },
           });
 
@@ -782,6 +783,7 @@ module.exports = {
               material_type_id: { [Op.in]: relevantMaterialIds },
               transaction_type_id: { [Op.in]: [2, 3, 4] },
               createdAt: { [Op.lte]: endOfDate },
+              warehouse_id: { [Op.ne]: null }
             },
           });
 
@@ -790,6 +792,7 @@ module.exports = {
               material_type_id: { [Op.in]: relevantMaterialIds },
               transaction_type_id: 4,
               createdAt: { [Op.between]: [new Date(date), endOfDate] },
+              warehouse_id: { [Op.ne]: null }
             },
           }) || 0;
 
@@ -798,6 +801,7 @@ module.exports = {
               material_type_id: { [Op.in]: relevantMaterialIds },
               transaction_type_id: 2,
               createdAt: { [Op.between]: [new Date(date), endOfDate] },
+              warehouse_id: { [Op.ne]: null }
             },
           }) || 0;
 
@@ -808,6 +812,7 @@ module.exports = {
               product_id: product.id,
               product_transaction_id: 1,
               createdAt: { [Op.lte]: endOfDate },
+              warehouse_id: { [Op.ne]: null }
             },
           });
 
@@ -816,6 +821,7 @@ module.exports = {
               product_id: product.id,
               product_transaction_id: { [Op.in]: [2, 3, 4] },
               createdAt: { [Op.lte]: endOfDate },
+              warehouse_id: { [Op.ne]: null }
             },
           });
 
@@ -824,6 +830,7 @@ module.exports = {
               product_id: product.id,
               product_transaction_id: 1,
               createdAt: { [Op.between]: [new Date(date), endOfDate] },
+              warehouse_id: { [Op.ne]: null }
             },
           }) || 0;
 
@@ -832,6 +839,7 @@ module.exports = {
               product_id: product.id,
               product_transaction_id: 2,
               createdAt: { [Op.between]: [new Date(date), endOfDate] },
+              warehouse_id: { [Op.ne]: null }
             },
           }) || 0;
 
@@ -840,6 +848,7 @@ module.exports = {
               product_id: product.id,
               product_transaction_id: 3,
               createdAt: { [Op.between]: [new Date(date), endOfDate] },
+              warehouse_id: { [Op.ne]: null }
             },
           }) || 0;
 
