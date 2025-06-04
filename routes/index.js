@@ -8,6 +8,7 @@ const customers = require("./customers")
 const materials = require("./materials")
 const warehouse = require("../controllers/warehouses")
 const fullskill = require("./fullskill")
+const purchases = require("./purchases")
 
 router.get("/", (req, res) => {
   res.status(200).json({
@@ -22,6 +23,7 @@ router.use("/products", products)
 router.use("/suppliers", suppliers)
 router.use("/customers", customers)
 router.use("/fullskill", fullskill)
+router.use("/purchases", purchases)
 router.get("/warehouses", warehouse.query)
 router.use("/material", materials)
 
