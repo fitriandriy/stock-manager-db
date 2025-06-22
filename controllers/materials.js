@@ -121,20 +121,64 @@ module.exports = {
         });
       }
 
-      const hasilProduksi = semuaTanggal.map(tanggal => ({
-        tanggal: new Date(tanggal).toLocaleDateString('id-ID'),
-        bahan_giling: mapBahan[tanggal] || 0,
-        hasil_produksi: hasilMap[tanggal] || []
-      }));
+      // 1. Ambil data plain dari table Purchases
+      const purchases = await Purchases.findAll({ raw: true });
+
+      // 2. Filter hanya product_id = 5 dan mapping nominal-nya ke per tanggal
+      const pembelianProduk5 = purchases
+        .filter(p => p.product_id === 5)
+        .reduce((acc, curr) => {
+          const tanggal = new Date(curr.date).toISOString().split('T')[0]; // kolom 'date'
+          acc[tanggal] = (acc[tanggal] || 0) + Number(curr.nominal || 0);
+          return acc;
+        }, {});
+
+      const hasilProduksi = semuaTanggal.map(tanggal => {
+        const tanggalKey = new Date(tanggal).toISOString().split('T')[0]; // '2025-05-21'
+
+        return {
+          tanggal: new Date(tanggal).toLocaleDateString('id-ID'), // biar tampil enak dibaca
+          bahan_giling: mapBahan[tanggal] || 0,
+          hasil_produksi: hasilMap[tanggal] || [],
+          pembelian: pembelianProduk5[tanggalKey] ?? null
+        };
+      });
 
       const total = await Purchases.findOne({
         attributes: [[fn('SUM', col('nominal')), 'totalSum']],
         raw: true,
       });
 
-      res.json({
+      // 11: bropre
+      const totalPindahBahanBropre = await StockProducts.sum('total', {
+        where: {
+          warehouse_id: 1,
+          product_transaction_id: 3,
+          description: 'Giling untuk Kuning',
+          product_id: {
+            [Op.in]: [11]
+          }
+        }
+      });
+
+      // 14: eko
+      const totalPindahBahanEko = await StockProducts.sum('total', {
+        where: {
+          warehouse_id: 1,
+          product_transaction_id: 3,
+          description: 'Giling untuk Kuning',
+          product_id: {
+            [Op.in]: [14]
+          }
+        }
+      });
+
+      const totalPindahBahan = (totalPindahBahanBropre * 50) + (totalPindahBahanEko * 25)
+
+      res.status(200).json({
         total_bahan_giling: totalBahan !== null ? parseInt(totalBahan) : null,
         total_pembelian: total.totalSum || 0,
+        total_pindah_bahan: totalPindahBahan || 0,
         total_hasil_produksi: totalProduksi !== null ? parseInt(totalProduksi) : null,
         total_hasil_produksi_tiap_produk: hasilPerProduk,
         hasil_produksi: hasilProduksi

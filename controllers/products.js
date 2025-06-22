@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require("uuid");
 const { Op } = require("sequelize");
 const { sequelize } = require("../external/postgres");
-const { Users, Warehouses, Products, Stocks, StockProducts, ProductTransactions } = require("../db/models");
+const { Users, Warehouses, Products, Stocks, StockProducts, ProductTransactions, Purchases } = require("../db/models");
 
 module.exports = {
   query_data: async (req, res) => {
@@ -867,9 +867,19 @@ module.exports = {
         });
       }
 
+      const pembelian = await Purchases.findOne({
+        where: {
+          product_id: 5,
+          date: date
+        },
+        raw: true
+      });
+
+      const nominal = pembelian ? pembelian.nominal : null;
       res.status(200).json({
         status: true,
         message: "Laporan berhasil diambil",
+        pembelian: nominal,
         data: result,
       });
     } catch (err) {
