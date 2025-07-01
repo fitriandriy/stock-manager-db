@@ -161,6 +161,28 @@ module.exports = {
         }
       });
 
+      const bahanBpPs = await StockProducts.sum('total', {
+        where: {
+          warehouse_id: 1,
+          product_transaction_id: 3,
+          description: 'Giling untuk PS',
+          product_id: {
+            [Op.in]: [11]
+          }
+        }
+      });
+
+      const bahanBpLebah = await StockProducts.sum('total', {
+        where: {
+          warehouse_id: 1,
+          product_transaction_id: 3,
+          description: 'Giling untuk Lebah',
+          product_id: {
+            [Op.in]: [11]
+          }
+        }
+      });
+
       // 14: eko
       const totalPindahBahanEko = await StockProducts.sum('total', {
         where: {
@@ -173,12 +195,38 @@ module.exports = {
         }
       });
 
+      const bahanEkoPs = await StockProducts.sum('total', {
+        where: {
+          warehouse_id: 1,
+          product_transaction_id: 3,
+          description: 'Giling untuk PS',
+          product_id: {
+            [Op.in]: [14]
+          }
+        }
+      });
+
+      const bahanEkoLebah = await StockProducts.sum('total', {
+        where: {
+          warehouse_id: 1,
+          product_transaction_id: 3,
+          description: 'Giling untuk Lebah',
+          product_id: {
+            [Op.in]: [14]
+          }
+        }
+      });
+
       const totalPindahBahan = (totalPindahBahanBropre * 50) + (totalPindahBahanEko * 25)
+      const bahanCampuranPS = (bahanBpPs * 50) + (bahanEkoPs * 25)
+      const bahanCampuranLebah = (bahanBpLebah * 50) + (bahanEkoLebah * 25)
 
       res.status(200).json({
         total_bahan_giling: totalBahan !== null ? parseInt(totalBahan) : null,
         total_pembelian: total.totalSum || 0,
         total_pindah_bahan: totalPindahBahan || 0,
+        bahan_campuran_ps: bahanCampuranPS || 0,
+        bahan_campuran_lebah: bahanCampuranLebah || 0,
         total_hasil_produksi: totalProduksi !== null ? parseInt(totalProduksi) : null,
         total_hasil_produksi_tiap_produk: hasilPerProduk,
         hasil_produksi: hasilProduksi
