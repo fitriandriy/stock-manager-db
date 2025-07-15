@@ -146,6 +146,9 @@ module.exports = {
 
       const total = await Purchases.findOne({
         attributes: [[fn('SUM', col('nominal')), 'totalSum']],
+        where: {
+          product_id: 5
+        },
         raw: true,
       });
 

@@ -1,4 +1,4 @@
-const { Purchases, Customers, Products } = require("../db/models");
+const { Purchases, Customers, Products, StockProducts } = require("../db/models");
 const { Op, fn, col } = require("sequelize");
 
 module.exports = {
@@ -12,6 +12,17 @@ module.exports = {
           message: "Bad request.",
           data: null
         });
+      }
+
+      if ( product_id === 30 ) {
+        await StockProducts.create({
+          product_id: 30,
+          warehouse_id: 5,
+          product_transaction_id: 1,
+          total: nominal/50,
+          description: '',
+          editor: 1
+        })
       }
 
       const result = await Purchases.create({
@@ -71,8 +82,19 @@ module.exports = {
         ]
       });
 
-      const total = await Purchases.findOne({
+      const totalPS5 = await Purchases.findOne({
         attributes: [[fn('SUM', col('nominal')), 'totalSum']],
+        where: {
+          product_id: 5
+        },
+        raw: true,
+      });
+
+      const totalKetan = await Purchases.findOne({
+        attributes: [[fn('SUM', col('nominal')), 'totalSum']],
+        where: {
+          product_id: 30
+        },
         raw: true,
       });
 
@@ -88,7 +110,8 @@ module.exports = {
         status: true,
         message: "Filtered purchases by month.",
         data: {
-          total: total.totalSum,
+          totalPS5: totalPS5.totalSum,
+          totalKetan: totalKetan.totalSum,
           data: result
         }
       });
