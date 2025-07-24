@@ -3,25 +3,25 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Retur extends Model {
+  class Returs extends Model {
     static associate(models) {
-      Retur.belongsTo(models.Products, {
+      Returs.belongsTo(models.Products, {
         foreignKey: "product_id",
         as: "product"
       })
     }
   }
-  Retur.init({
+  Returs.init({
     date: DataTypes.STRING,
     product_id: DataTypes.INTEGER,
-    stock: DataTypes.INTEGER,
+    stock: DataTypes.STRING,
     stock_description: DataTypes.STRING,
-    items_out: DataTypes.INTEGER,
+    items_out: DataTypes.STRING,
     items_out_description: DataTypes.STRING
   }, {
     sequelize,
-    modelName: 'Retur',
+    modelName: 'Returs',
     timestamps: false
   });
-  return Retur;
+  return Returs;
 };

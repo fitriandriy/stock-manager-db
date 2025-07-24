@@ -15,9 +15,9 @@ module.exports = (sequelize, DataTypes) => {
         as: "purchases"
       })
 
-      Products.hasMany(models.Retur, {
+      Products.hasMany(models.Returs, {
         foreignKey: "product_id",
-        as: 'retur'
+        as: 'returs'
       })
     }
   }

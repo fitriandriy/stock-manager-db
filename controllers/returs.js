@@ -1,4 +1,5 @@
-const { Retur } = require("../db/models");
+const { Returs } = require("../db/models");
+const { Op, json } = require("sequelize");
 
 module.exports = {
   updateRetur: async (req, res) => {
@@ -8,6 +9,8 @@ module.exports = {
       if (!date || !Array.isArray(data)) {
         return res.status(400).json({ message: 'Mohon lengkapi isian data.' });
       }
+
+      console.log(JSON.stringify(data))
 
       const results = [];
 
@@ -20,7 +23,7 @@ module.exports = {
           items_out_description
         } = item;
 
-        const existing = await Retur.findOne({
+        const existing = await Returs.findOne({
           where: { date, product_id }
         });
 
@@ -33,7 +36,7 @@ module.exports = {
           });
           results.push({ product_id, status: 'updated', data: existing });
         } else {
-          const created = await Retur.create({
+          const created = await Returs.create({
             date,
             product_id,
             stock,
@@ -47,7 +50,7 @@ module.exports = {
 
       return res.status(200).json({
         message: 'Retur data processed successfully',
-        results
+        data: results
       });
 
     } catch (error) {
@@ -58,25 +61,26 @@ module.exports = {
 
   query: async (req, res) => {
     try {
-      const { date } = req.query
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0, 23, 59, 59);
-      const retur = await Retur.findAll({
+      const { date } = req.params;
+
+      const retur = await Returs.findAll({
         where: {
           date: {
-            [Op.between]: [startDate, endDate]
+            [Op.eq]: date
           }
         }
-      })
+      });
 
       res.status(200).json({
         status: true,
         message: 'success',
         data: retur
-      })
+      });
+
     } catch (error) {
       console.error('Error updating retur:', error);
       return res.status(500).json({ message: 'Internal server error' });
     }
   }
+
 }

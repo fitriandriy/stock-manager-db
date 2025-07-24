@@ -9,6 +9,7 @@ const materials = require("./materials")
 const warehouse = require("../controllers/warehouses")
 const fullskill = require("./fullskill")
 const purchases = require("./purchases")
+const retur = require("./retur")
 
 router.get("/", (req, res) => {
   res.status(200).json({
@@ -26,5 +27,6 @@ router.use("/fullskill", fullskill)
 router.use("/purchases", purchases)
 router.get("/warehouses", warehouse.query)
 router.use("/material", materials)
+router.use("/retur", retur)
 
 module.exports = router;
