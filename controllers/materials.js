@@ -220,9 +220,42 @@ module.exports = {
         }
       });
 
+      // kuning
+      const bahanKuning25 = await StockProducts.sum('total', {
+        where: {
+          warehouse_id: 6,
+          product_transaction_id: 3,
+          description: 'Giling untuk Ekonomi',
+          product_id: {
+            [Op.in]: [26]
+          }
+        }
+      })
+      const bahanKuning10 = await StockProducts.sum('total', {
+        where: {
+          warehouse_id: 6,
+          product_transaction_id: 3,
+          description: 'Giling untuk Ekonomi',
+          product_id: {
+            [Op.in]: [27]
+          }
+        }
+      })
+      const bahanKuning5 = await StockProducts.sum('total', {
+        where: {
+          warehouse_id: 6,
+          product_transaction_id: 3,
+          description: 'Giling untuk Ekonomi',
+          product_id: {
+            [Op.in]: [28]
+          }
+        }
+      })
+
       const totalPindahBahan = (totalPindahBahanBropre * 50) + (totalPindahBahanEko * 25)
       const bahanCampuranPS = (bahanBpPs * 50) + (bahanEkoPs * 25)
       const bahanCampuranLebah = (bahanBpLebah * 50) + (bahanEkoLebah * 25)
+      const bahanCampuranEko = (bahanKuning25 * 25) + (bahanKuning10 * 10) + (bahanKuning5 * 5)
 
       res.status(200).json({
         total_bahan_giling: totalBahan !== null ? parseInt(totalBahan) : null,
@@ -230,6 +263,7 @@ module.exports = {
         total_pindah_bahan: totalPindahBahan || 0,
         bahan_campuran_ps: bahanCampuranPS || 0,
         bahan_campuran_lebah: bahanCampuranLebah || 0,
+        bahan_campuran_eko: bahanCampuranEko || 0,
         total_hasil_produksi: totalProduksi !== null ? parseInt(totalProduksi) : null,
         total_hasil_produksi_tiap_produk: hasilPerProduk,
         hasil_produksi: hasilProduksi
