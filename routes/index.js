@@ -1,8 +1,16 @@
 const express = require("express")
 const router = express.Router()
 const stocks = require("./stocks")
+const products = require("./products")
 const users = require("./users")
 const suppliers = require("./suppliers")
+const customers = require("./customers")
+const materials = require("./materials")
+const warehouse = require("../controllers/warehouses")
+const fullskill = require("./fullskill")
+const purchases = require("./purchases")
+const retur = require("./retur")
+const salesreturn = require("./salesreturn")
 
 router.get("/", (req, res) => {
   res.status(200).json({
@@ -13,6 +21,14 @@ router.get("/", (req, res) => {
 
 router.use("/auth", users)
 router.use("/stocks", stocks)
+router.use("/products", products)
 router.use("/suppliers", suppliers)
+router.use("/customers", customers)
+router.use("/fullskill", fullskill)
+router.use("/purchases", purchases)
+router.get("/warehouses", warehouse.query)
+router.use("/material", materials)
+router.use("/retur", retur)
+router.use("/salesreturn", salesreturn)
 
 module.exports = router;

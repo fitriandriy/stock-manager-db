@@ -2,323 +2,10 @@ const { v4: uuidv4 } = require("uuid");
 const { Op } = require("sequelize");
 const { sequelize, queryTypes } = require("../external/postgres");
 const jwt = require("jsonwebtoken")
-const { Stocks, Users, Warehouses, Suppliers, MaterialTypes, TransactionTypes } = require("../db/models");
+const { Stocks, Users, Warehouses, Suppliers, Customers, MaterialTypes, TransactionTypes } = require("../db/models");
 const { JWT_SECRET_KEY } = process.env;
 
 module.exports = {
-  // filter by warehouse and date
-  // query_data: async (req, res) => {
-  //   try {
-  //     const { warehouse, date } = req.params;
-  //     const startDate = new Date(`${date}T00:00:00Z`);
-  //     const endDate = new Date(`${date}T23:59:59.999Z`);
-  
-  //     const data = await Stocks.findAll({
-  //       where: {
-  //         warehouse_id: warehouse,
-  //         createdAt: {
-  //           [Op.between]: [startDate, endDate]
-  //         }
-  //       },
-  //       include: [
-  //         {
-  //           model: Warehouses,
-  //           as: 'warehouse',
-  //           attributes: ['name']
-  //         },
-  //         {
-  //           model: Suppliers,
-  //           as: 'supplier',
-  //           attributes: ['name']
-  //         },
-  //         {
-  //           model: MaterialTypes,
-  //           as: 'material',
-  //           attributes: ['name']
-  //         },
-  //         {
-  //           model: TransactionTypes,
-  //           as: 'transaction_type',
-  //           attributes: ['name']
-  //         },
-  //         {
-  //           model: Users,
-  //           as: 'user',
-  //           attributes: ['username']
-  //         }
-  //       ],
-  //       attributes: ['id', 'amount', 'description'],
-  //       order: [['id', 'ASC']]
-  //     });
-  
-  //     const formattedData = await Promise.all(
-  //       data.map(async (stock) => {
-  //         const [totalAResult] = await sequelize.query(`
-  //           SELECT 
-  //             COALESCE(SUM(CASE WHEN transaction_type_id = 1 THEN amount END), 0) -
-  //             COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3) THEN amount END), 0) AS total_material_A
-  //           FROM "Stocks"
-  //           WHERE material_type_id = (SELECT id FROM "MaterialTypes" WHERE name = 'A')
-  //             AND warehouse_id = ${warehouse}
-  //             AND "id" <= ${stock.id};
-  //         `);
-      
-  //         const totalA = parseInt(totalAResult[0]?.total_material_a || 0, 10);
-      
-  //         const [totalBResult] = await sequelize.query(`
-  //           SELECT 
-  //             COALESCE(SUM(CASE WHEN transaction_type_id = 1 THEN amount END), 0) -
-  //             COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3) THEN amount END), 0) AS total_material_B
-  //           FROM "Stocks"
-  //           WHERE material_type_id = (SELECT id FROM "MaterialTypes" WHERE name = 'B')
-  //             AND warehouse_id = ${warehouse}
-  //             AND "id" <= ${stock.id};
-  //         `);
-      
-  //         const totalB = parseInt(totalBResult[0]?.total_material_b || 0, 10);
-      
-  //         const [totalCResult] = await sequelize.query(`
-  //           SELECT 
-  //             COALESCE(SUM(CASE WHEN transaction_type_id = 1 THEN amount END), 0) -
-  //             COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3) THEN amount END), 0) AS total_material_C
-  //           FROM "Stocks"
-  //           WHERE material_type_id = (SELECT id FROM "MaterialTypes" WHERE name = 'C')
-  //             AND warehouse_id = ${warehouse}
-  //             AND "id" <= ${stock.id};
-  //         `);
-      
-  //         const totalC = parseInt(totalCResult[0]?.total_material_c || 0, 10);
-      
-  //         const [totalBrResult] = await sequelize.query(`
-  //           SELECT 
-  //             COALESCE(SUM(CASE WHEN transaction_type_id = 1 THEN amount END), 0) -
-  //             COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3) THEN amount END), 0) AS total_material_Br
-  //           FROM "Stocks"
-  //           WHERE material_type_id = (SELECT id FROM "MaterialTypes" WHERE name = 'Bramo')
-  //             AND warehouse_id = ${warehouse}
-  //             AND "id" <= ${stock.id};
-  //         `);
-      
-  //         const totalBr = parseInt(totalBrResult[0]?.total_material_br || 0, 10);
-
-  //         const [totalIR64Result] = await sequelize.query(`
-  //           SELECT 
-  //             COALESCE(SUM(CASE WHEN transaction_type_id = 1 AND material_type_id IN 
-  //               (SELECT id FROM "MaterialTypes" WHERE name IN ('A', 'B', 'C')) THEN amount END), 0) -
-  //             COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3) AND material_type_id IN 
-  //               (SELECT id FROM "MaterialTypes" WHERE name IN ('A', 'B', 'C')) THEN amount END), 0) AS total_IR64
-  //           FROM "Stocks"
-  //           WHERE warehouse_id = ${warehouse}
-  //             AND "id" <= ${stock.id};
-  //         `);
-      
-  //         const totalIR64 = parseInt(totalIR64Result[0]?.total_ir64 || 0, 10);
-      
-  //         const [totalGlobalBrResult] = await sequelize.query(`
-  //           SELECT 
-  //             COALESCE(SUM(CASE WHEN transaction_type_id = 1 THEN amount END), 0) -
-  //             COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3) THEN amount END), 0) AS total_global_Br
-  //           FROM "Stocks"
-  //           WHERE material_type_id = (SELECT id FROM "MaterialTypes" WHERE name = 'Bramo')
-  //             AND warehouse_id = ${warehouse}
-  //             AND "id" <= ${stock.id};
-  //         `);
-      
-  //         const totalGlobalBr = parseInt(totalGlobalBrResult[0]?.total_global_br || 0, 10);
-      
-  //         return {
-  //           id: stock.id,
-  //           amount: stock.amount,
-  //           warehouse: stock.warehouse.name,
-  //           supplier: stock.supplier.name,
-  //           material: stock.material.name,
-  //           transaction_type: stock.transaction_type.name,
-  //           user: stock.user.username,
-  //           description: stock.description,
-  //           totalA,
-  //           totalB,
-  //           totalC,
-  //           totalBr,
-  //           totalIR64,
-  //           totalGlobalBr
-  //         };
-  //       })
-  //     );
-  
-  //     console.log(`DATAA: ${JSON.stringify(formattedData, null, 2)}`);
-  
-  //     res.status(200).json({
-  //       status: true,
-  //       message: 'success',
-  //       data: formattedData
-  //     });
-  //   } catch (error) {
-  //     console.error('Error:', error);
-  //     res.status(500).json({
-  //       status: false,
-  //       message: 'An error occurred while querying data',
-  //       data: null
-  //     });
-  //   }
-  // }, 
-
-  // query_data: async (req, res) => {
-  //   try {
-  //     const { warehouse, date } = req.params;
-  //     const startDate = new Date(`${date}T00:00:00Z`);
-  //     const endDate = new Date(`${date}T23:59:59.999Z`);
-  
-  //     const data = await Stocks.findAll({
-  //       where: {
-  //         warehouse_id: warehouse,
-  //         createdAt: {
-  //           [Op.between]: [startDate, endDate]
-  //         }
-  //       },
-  //       include: [
-  //         {
-  //           model: Warehouses,
-  //           as: 'warehouse',
-  //           attributes: ['name']
-  //         },
-  //         {
-  //           model: Suppliers,
-  //           as: 'supplier',
-  //           attributes: ['name']
-  //         },
-  //         {
-  //           model: MaterialTypes,
-  //           as: 'material',
-  //           attributes: ['name']
-  //         },
-  //         {
-  //           model: TransactionTypes,
-  //           as: 'transaction_type',
-  //           attributes: ['name']
-  //         },
-  //         {
-  //           model: Users,
-  //           as: 'user',
-  //           attributes: ['username']
-  //         }
-  //       ],
-  //       attributes: ['id', 'amount', 'description', 'createdAt'],
-  //       order: [['createdAt', 'ASC']]
-  //     });
-      
-  //     const formattedData = await Promise.all(
-  //       data.map(async (stock) => {        
-  //           let lastTotalA = 0;
-  //           let lastTotalB = 0;
-  //           let lastTotalC = 0;
-  //           let lastTotalBr = 0;
-  //           let lastProcessedDate = null;
-  //           const createdAtFormatted = stock.createdAt.toISOString();
-  //           const currentDate = stock.createdAt.toISOString().split('T')[0];
-      
-  //           // Jika masuk ke tanggal baru, reset total ke nilai hari sebelumnya
-  //           if (currentDate !== lastProcessedDate) {
-  //             lastProcessedDate = currentDate;
-  //           }
-      
-  //           // Query untuk mendapatkan total stok sebelum transaksi ini
-  //           const [totalAResult] = await sequelize.query(`
-  //             SELECT 
-  //               COALESCE(SUM(CASE WHEN transaction_type_id = 1 THEN amount END), 0) -
-  //               COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3) THEN amount END), 0) AS total_material_A
-  //             FROM "Stocks"
-  //             WHERE material_type_id = (SELECT id FROM "MaterialTypes" WHERE name = 'A')
-  //               AND warehouse_id = ${warehouse}
-  //               AND "createdAt" <= '${createdAtFormatted}';
-  //           `);
-  //           let totalA = parseInt(totalAResult[0]?.total_material_a || 0, 10);
-  //           if (currentDate === lastProcessedDate) {
-  //             totalA = lastTotalA + stock.amount;
-  //           }
-  //           lastTotalA = totalA;
-      
-  //           // Query untuk total stok material B
-  //           const [totalBResult] = await sequelize.query(`
-  //             SELECT 
-  //               COALESCE(SUM(CASE WHEN transaction_type_id = 1 THEN amount END), 0) -
-  //               COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3) THEN amount END), 0) AS total_material_B
-  //             FROM "Stocks"
-  //             WHERE material_type_id = (SELECT id FROM "MaterialTypes" WHERE name = 'B')
-  //               AND warehouse_id = ${warehouse}
-  //               AND "createdAt" <= '${createdAtFormatted}';
-  //           `);
-  //           let totalB = parseInt(totalBResult[0]?.total_material_b || 0, 10);
-  //           if (currentDate === lastProcessedDate) {
-  //             totalB = lastTotalB + stock.amount;
-  //           }
-  //           lastTotalB = totalB;
-      
-  //           // Query untuk total stok material C
-  //           const [totalCResult] = await sequelize.query(`
-  //             SELECT 
-  //               COALESCE(SUM(CASE WHEN transaction_type_id = 1 THEN amount END), 0) -
-  //               COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3) THEN amount END), 0) AS total_material_C
-  //             FROM "Stocks"
-  //             WHERE material_type_id = (SELECT id FROM "MaterialTypes" WHERE name = 'C')
-  //               AND warehouse_id = ${warehouse}
-  //               AND "createdAt" <= '${createdAtFormatted}';
-  //           `);
-  //           let totalC = parseInt(totalCResult[0]?.total_material_c || 0, 10);
-  //           if (currentDate === lastProcessedDate) {
-  //             totalC = lastTotalC + stock.amount;
-  //           }
-  //           lastTotalC = totalC;
-      
-  //           // Query untuk total stok material Br
-  //           const [totalBrResult] = await sequelize.query(`
-  //             SELECT 
-  //               COALESCE(SUM(CASE WHEN transaction_type_id = 1 THEN amount END), 0) -
-  //               COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3) THEN amount END), 0) AS total_material_Br
-  //             FROM "Stocks"
-  //             WHERE material_type_id = (SELECT id FROM "MaterialTypes" WHERE name = 'Bramo')
-  //               AND warehouse_id = ${warehouse}
-  //               AND "createdAt" <= '${createdAtFormatted}';
-  //           `);
-  //           let totalBr = parseInt(totalBrResult[0]?.total_material_br || 0, 10);
-  //           if (currentDate === lastProcessedDate) {
-  //             totalBr = lastTotalBr + stock.amount;
-  //           }
-  //           lastTotalBr = totalBr;
-      
-  //           return {
-  //             id: stock.id,
-  //             amount: stock.amount,
-  //             warehouse: stock.warehouse.name,
-  //             supplier: stock.supplier.name,
-  //             material: stock.material.name,
-  //             transaction_type: stock.transaction_type.name,
-  //             user: stock.user.username,
-  //             description: stock.description,
-  //             totalA,
-  //             totalB,
-  //             totalC,
-  //             totalBr
-  //           };
-  //         })
-  //       );
-  
-  //     console.log(`DATAA: ${JSON.stringify(formattedData, null, 2)}`);
-  
-  //     res.status(200).json({
-  //       status: true,
-  //       message: 'success',
-  //       data: formattedData
-  //     });
-  //   } catch (error) {
-  //     console.error('Error:', error);
-  //     res.status(500).json({
-  //       status: false,
-  //       message: 'An error occurred while querying data',
-  //       data: null
-  //     });
-  //   }
-  // },
-  
   query_data: async (req, res) => {
     try {
       const { warehouse, date } = req.params;
@@ -336,11 +23,12 @@ module.exports = {
         include: [
           { model: Warehouses, as: 'warehouse', attributes: ['name'] },
           { model: Suppliers, as: 'supplier', attributes: ['name'] },
+          { model: Customers, as: 'customer', attributes: ['name'] },
           { model: MaterialTypes, as: 'material', attributes: ['name'] },
           { model: TransactionTypes, as: 'transaction_type', attributes: ['name'] },
           { model: Users, as: 'user', attributes: ['username'] }
         ],
-        attributes: ['id', 'amount', 'description', 'createdAt', 'transaction_type_id', 'material_type_id'],
+        attributes: ['id', 'amount', 'plate_number', 'description', 'createdAt', 'transaction_type_id', 'material_type_id'],
         order: [['id']]
       });
   
@@ -348,7 +36,7 @@ module.exports = {
       const initialTotals = await sequelize.query(`
         SELECT 
           COALESCE(SUM(CASE WHEN transaction_type_id = 1 THEN amount END), 0) -
-          COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3) THEN amount END), 0) AS total,
+          COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3, 4) THEN amount END), 0) AS total,
           material_type_id
         FROM "Stocks"
         WHERE warehouse_id = ${warehouse} AND "createdAt" < '${startDate.toISOString()}'
@@ -360,7 +48,7 @@ module.exports = {
         A: initialTotals.find(row => row.material_type_id === 1)?.total || 0,
         B: initialTotals.find(row => row.material_type_id === 2)?.total || 0,
         C: initialTotals.find(row => row.material_type_id === 3)?.total || 0,
-        // BR: initialTotals.find(row => row.material_type_id === 4)?.total || 0
+        BRAMO: initialTotals.find(row => row.material_type_id === 4)?.total || 0,
       };
   
       let lastProcessedDate = null;
@@ -392,21 +80,23 @@ module.exports = {
 
         if (stock.transaction_type_id === 1) { // Transaksi masuk
           totalStockCache[materialKey] += stockAmount;
-        } else if (stock.transaction_type_id === 2 || stock.transaction_type_id === 3) { // Transaksi keluar
+        } else if (stock.transaction_type_id === 2 || stock.transaction_type_id === 3 || stock.transaction_type_id === 4) { // Transaksi keluar
           totalStockCache[materialKey] -= stockAmount;
         }
 
         totalIR64 = Number(totalStockCache["A"]) + Number(totalStockCache["B"]) + Number(totalStockCache["C"]);
         totalGlobalBr = Number(totalStockCache["BRAMO"]) || 0;
-  
+        
         return {
           id: stock.id,
           amount: stock.amount,
           warehouse: stock.warehouse.name,
-          supplier: stock.supplier.name,
+          supplier: stock.supplier?.name || "N/A",
+          customer: stock.customer?.name || "N/A",
           material: stock.material.name,
           transaction_type: stock.transaction_type.name,
           user: stock.user.username,
+          plate_number: stock.plate_number || "",
           description: stock.description,
           totalA: totalStockCache.A,
           totalB: totalStockCache.B,
@@ -414,7 +104,7 @@ module.exports = {
           totalBr: totalStockCache.BRAMO || 0,
           totalIR64,
           totalGlobalBr
-        };
+        }; 
       });
   
       res.status(200).json({
@@ -434,7 +124,7 @@ module.exports = {
 
   create: async (req, res) => {
     try {
-      const { warehouse_id, supplier_id, material_type_id, amount, transaction_type_id, editor_id, createdAt } = req.body;
+      const { warehouse_id, supplier_id, customer_id, material_type_id, amount, plate_number, transaction_type_id, editor_id, createdAt } = req.body;
 
       const user = await Users.findOne({where: {id: editor_id}})
 
@@ -449,8 +139,10 @@ module.exports = {
       const stocks = await Stocks.create({
         warehouse_id,
         supplier_id,
+        customer_id,
         material_type_id,
         amount,
+        plate_number,
         transaction_type_id,
         editor_id,
         createdAt,
@@ -528,7 +220,7 @@ module.exports = {
 
   update: async (req, res) => {
     try {
-      const { id, warehouse_id, supplier_id, material_type_id, amount, transaction_type_id, editor_id } = req.body;
+      const { id, warehouse_id, supplier_id, material_type_id, amount, plate_number, transaction_type_id, editor_id } = req.body;
       const { authorization } = req.headers;
 
       const token = authorization.split(" ")[1];
@@ -547,6 +239,7 @@ module.exports = {
         supplier_id,
         material_type_id,
         amount,
+        plate_number,
         transaction_type_id,
         editor_id,
         updatedAt: new Date()
@@ -615,35 +308,216 @@ module.exports = {
 
   reports: async (req, res) => {
     try {
-      const {date} = req.params;
-
-      const giling64 = await sequelize.query(`
-        SELECT SUM(amount) AS total_amount
-          FROM "Stocks"
-          WHERE transaction_type_id = 2
-            AND material_type_id IN (1, 2, 3)
-            AND DATE("createdAt") = ${date};
-        `)
-      const gilingBr = await sequelize.query(`
-        SELECT SUM(amount) AS total_amount
-          FROM "Stocks"
-          WHERE transaction_type_id = 2
-            AND material_type_id IN (4)
-            AND DATE("createdAt") = ${date};
-        `)
-      const totalA = await sequelize.query(`
-        `)
-      const [totalIR64Result] = await sequelize.query(`
-        SELECT 
-          COALESCE(SUM(CASE WHEN transaction_type_id = 1 AND material_type_id IN 
-            (SELECT id FROM "MaterialTypes" WHERE name IN ('A', 'B', 'C')) THEN amount END), 0) -
-          COALESCE(SUM(CASE WHEN transaction_type_id IN (2, 3) AND material_type_id IN 
-            (SELECT id FROM "MaterialTypes" WHERE name IN ('A', 'B', 'C')) THEN amount END), 0) AS total_IR64
-        FROM "Stocks"
-        WHERE "createdAt" <= '2025-01-24'
-      `);
-    } catch (error) {
+      const { date } = req.params;
+  
+      const giling64Result = await sequelize.query(
+        `SELECT SUM(amount) AS total_amount
+         FROM "Stocks"
+         WHERE transaction_type_id = 2
+         AND material_type_id IN (1, 2, 3)
+         AND "warehouse_id" IS NOT NULL
+         AND DATE("createdAt") = '${date}'`
+      );
       
+      const gilingBrResult = await sequelize.query(
+        `SELECT SUM(amount) AS total_amount
+         FROM "Stocks"
+         WHERE transaction_type_id = 2
+         AND material_type_id IN (4)
+         AND "warehouse_id" IS NOT NULL
+         AND DATE("createdAt") = '${date}'`
+      );
+      
+      const totalAResult = await sequelize.query(
+        `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 1 
+                     AND "transaction_type_id" = 1 
+                     AND "warehouse_id" IS NOT NULL
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 1 
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND "warehouse_id" IS NOT NULL
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_a"`
+      );
+
+      const totalBResult = await sequelize.query(
+        `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 2 
+                     AND "transaction_type_id" = 1 
+                     AND "warehouse_id" IS NOT NULL
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 2 
+                     AND "warehouse_id" IS NOT NULL
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_b"`
+      );
+
+      const totalCResult = await sequelize.query(
+        `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 3 
+                     AND "warehouse_id" IS NOT NULL
+                     AND "transaction_type_id" = 1 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 3 
+                     AND "warehouse_id" IS NOT NULL
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_c"`
+      );
+
+      const totalBrResult = await sequelize.query(
+        `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 4 
+                     AND "warehouse_id" IS NOT NULL
+                     AND "transaction_type_id" = 1 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "material_type_id" = 4 
+                     AND "warehouse_id" IS NOT NULL
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_br"`
+      );
+
+      const gilingBr = gilingBrResult[0][0].total_amount || 0;
+      const giling64 = giling64Result[0][0].total_amount || 0;
+      const totalA = totalAResult[0][0].total_stock_a || 0;
+      const totalB = totalBResult[0][0].total_stock_b || 0;
+      const totalC = totalCResult[0][0].total_stock_c || 0;
+      const totalIR64 = parseInt(totalA) + parseInt(totalB) + parseInt(totalC)
+      const totalBr = totalBrResult[0][0].total_stock_br || 0;
+
+      const warehouses = await Warehouses.findAll()
+
+      let data = [];
+
+      for (const warehouse of warehouses) {
+        const warehouseId = warehouse.id;
+        const warehouseName = warehouse.name;
+
+        const totalAResult = await sequelize.query(
+          `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
+                     AND "material_type_id" = 1 
+                     AND "transaction_type_id" = 1 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
+                     AND "material_type_id" = 1 
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_a"`
+        );
+
+        const totalBResult = await sequelize.query(
+          `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
+                     AND "material_type_id" = 2 
+                     AND "transaction_type_id" = 1 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
+                     AND "material_type_id" = 2 
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_b"`
+        );
+
+        const totalCResult = await sequelize.query(
+          `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
+                     AND "material_type_id" = 3 
+                     AND "transaction_type_id" = 1 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
+                     AND "material_type_id" = 3 
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_c"`
+        );
+
+        const totalBrResult = await sequelize.query(
+          `SELECT 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
+                     AND "material_type_id" = 4 
+                     AND "transaction_type_id" = 1 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           - 
+           COALESCE((SELECT SUM("amount") FROM "Stocks" 
+                     WHERE "warehouse_id" = ${warehouseId}
+                     AND "warehouse_id" IS NOT NULL
+                     AND "material_type_id" = 4 
+                     AND "transaction_type_id" IN (2, 3, 4) 
+                     AND DATE("createdAt") <= '${date}'), 0) 
+           AS "total_stock_br"`
+        );
+
+        const totalA = totalAResult[0][0].total_stock_a || 0;
+        const totalB = totalBResult[0][0].total_stock_b || 0;
+        const totalC = totalCResult[0][0].total_stock_c || 0;
+        const totalBr = totalBrResult[0][0].total_stock_br || 0;
+
+        const totalIR64 = parseInt(totalA) + parseInt(totalB) + parseInt(totalC);
+
+        data.push({
+          id: warehouseId,
+          warehouse: warehouseName,
+          totalA,
+          totalB,
+          totalC,
+          totalIR64,
+          totalBr,
+        });
+      }
+      
+      return res.status(200).json({
+        status: true,
+        message: "success",
+        data: {
+          giling64,
+          gilingBr,
+          totalA,
+          totalB,
+          totalC,
+          totalIR64,
+          totalBr,
+          stokGudang: data
+        }
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        status: false,
+        message: "Internal server error.",
+      });
     }
-  }
+  }  
 }

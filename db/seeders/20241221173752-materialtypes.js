@@ -5,15 +5,19 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     return queryInterface.bulkInsert('MaterialTypes', [
       {
+        "id": 1,
         "name": "A"
       },
       {
+        "id": 2,
         "name": "B"
       },
       {
+        "id": 3,
         "name": "C"
       },
       {
+        "id": 4,
         "name": "Bramo"
       },
     ])

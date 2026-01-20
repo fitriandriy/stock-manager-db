@@ -3,27 +3,27 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    return queryInterface.bulkInsert('TransactionTypes', [
+    return queryInterface.bulkInsert('ProductTransactions', [
       {
         "id": 1,
         "name": "masuk"
       },
       {
         "id": 2,
-        "name": "giling"
+        "name": "jual"
       },
       {
         "id": 3,
-        "name": "pindah"
+        "name": "giling"
       },
       {
         "id": 4,
-        "name": "jual"
+        "name": "pindah"
       }
     ])
   },
 
   async down (queryInterface, Sequelize) {
-    return queryInterface.bulkDelete('TransactionTypes', null, {});
+    return queryInterface.bulkDelete('ProductTransactions', null, {});
   }
 };
