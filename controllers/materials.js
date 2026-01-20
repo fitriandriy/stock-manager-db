@@ -1,10 +1,11 @@
 const { Op, fn, col, literal } = require("sequelize");
 const { Stocks, Products, StockProducts, Purchases } = require("../db/models");
+const { sequelize } = require("../external/postgres");
 
 module.exports = {
   getRekapProduksi: async (req, res) => {
     try {
-      const startDate = new Date('2025-05-18');
+      const startDate = new Date('2025-12-31');
 
       // Total bahan giling hanya yang transaction_type_id: 2
       const totalBahan = await Stocks.sum('amount', {
@@ -257,7 +258,48 @@ module.exports = {
       const bahanCampuranLebah = (bahanBpLebah * 50) + (bahanEkoLebah * 25)
       const bahanCampuranEko = (bahanKuning25 * 25) + (bahanKuning10 * 10) + (bahanKuning5 * 5)
 
+      // =====================
+      // RETUR (TOTAL)
+      // =====================
+      const [totalRetur] = await sequelize.query(
+        `
+        SELECT
+          COALESCE(SUM(ri.amount * p.weight), 0) AS total_weight
+        FROM "SalesReturns" sr
+        JOIN "ReturItems" ri ON ri.sales_return_id = sr.id
+        JOIN "Products" p ON p.id = ri.product_id
+        WHERE sr.date >= :startDate
+        `,
+        {
+          replacements: { startDate },
+          type: sequelize.QueryTypes.SELECT
+        }
+      );
+
+      // =====================
+      // RETUR PER HARI
+      // =====================
+      const returPerHari = await sequelize.query(
+        `
+        SELECT
+          sr.date,
+          SUM(ri.amount * p.weight) AS total_weight
+        FROM "SalesReturns" sr
+        JOIN "ReturItems" ri ON ri.sales_return_id = sr.id
+        JOIN "Products" p ON p.id = ri.product_id
+        WHERE sr.date >= :startDate
+        GROUP BY sr.date
+        ORDER BY sr.date
+        `,
+        {
+          replacements: { startDate },
+          type: sequelize.QueryTypes.SELECT
+        }
+      );
+
       res.status(200).json({
+        total_retur: Number(totalRetur.total_weight),
+        retur_per_hari: returPerHari,
         total_bahan_giling: totalBahan !== null ? parseInt(totalBahan) : null,
         total_pembelian: total.totalSum || 0,
         total_pindah_bahan: totalPindahBahan || 0,

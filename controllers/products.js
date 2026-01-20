@@ -875,11 +875,33 @@ module.exports = {
         raw: true
       });
 
+      const beli64 = await Stocks.sum("amount", {
+        where: {
+          material_type_id: { [Op.in]: [1, 2, 3] },
+          transaction_type_id: 1,
+          warehouse_id: { [Op.ne]: null },
+          transfer_id: null,
+          createdAt: { [Op.between]: [new Date(date), endOfDate] }
+        }
+      });
+
+      const beliBr = await Stocks.sum("amount", {
+        where: {
+          material_type_id: { [Op.in]: [4] },
+          transaction_type_id: 1,
+          createdAt: { [Op.between]: [new Date(date), endOfDate] },
+          warehouse_id: { [Op.ne]: null },
+          transfer_id: null
+        },
+      });
+
       const nominal = pembelian ? pembelian.nominal : null;
       res.status(200).json({
         status: true,
         message: "Laporan berhasil diambil",
         pembelian: nominal,
+        beli64: beli64,
+        beliBr: beliBr,
         data: result,
       });
     } catch (err) {
