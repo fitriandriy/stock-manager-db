@@ -126,6 +126,7 @@ module.exports = {
         JOIN "ReturItems" ri ON ri.sales_return_id = sr.id
         JOIN "Products" p ON p.id = ri.product_id
         WHERE sr.date BETWEEN '${startDate}' AND '${endDate}'
+        AND ri.product_id NOT IN (20, 32)
         `
       )
 
