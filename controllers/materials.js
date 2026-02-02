@@ -269,6 +269,7 @@ module.exports = {
         JOIN "ReturItems" ri ON ri.sales_return_id = sr.id
         JOIN "Products" p ON p.id = ri.product_id
         WHERE sr.date >= :startDate
+        AND ri.product_id NOT IN (20, 32)
         `,
         {
           replacements: { startDate },
@@ -288,6 +289,7 @@ module.exports = {
         JOIN "ReturItems" ri ON ri.sales_return_id = sr.id
         JOIN "Products" p ON p.id = ri.product_id
         WHERE sr.date >= :startDate
+        AND ri.product_id NOT IN (20, 32)
         GROUP BY sr.date
         ORDER BY sr.date
         `,
