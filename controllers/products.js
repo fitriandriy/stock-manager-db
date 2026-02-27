@@ -620,6 +620,7 @@ module.exports = {
             warehouse_id,
             product_id: product.id,
             product_transaction_id: 1,
+            transfer_id: null,
             createdAt: {
               [Op.between]: [startOfDate, endOfDate]
             }
@@ -829,6 +830,7 @@ module.exports = {
             where: {
               product_id: product.id,
               product_transaction_id: 1,
+              transfer_id: null,
               createdAt: { [Op.between]: [new Date(date), endOfDate] },
               warehouse_id: { [Op.ne]: null }
             },
